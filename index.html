@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>NCT DREAM : Dream Veggie Harvest</title>
+  <title>Dreamie Garden ☆</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -471,7 +471,7 @@
       display: flex;
       align-items: center;
       gap: 6px;
-      font-size: 13px;
+      font-size: 13.5px;
       font-weight: 800;
       color: #E0F2FE;
     }
@@ -705,7 +705,7 @@
           <div class="ticket-guide-banner">
             <div class="guide-banner-head">
               <span>💙</span>
-              <span id="ticketGuideTitle">NCT DREAM STREAM & VOTE GUIDE</span>
+              <span id="ticketAppName">IDOLCHAMP</span>
             </div>
 
             <div class="guide-banner-content">
@@ -798,7 +798,7 @@
       veggieCount: 0,
       lives: 3,
       isPlaying: false,
-      basketX: 0.5, // 0 to 1
+      basketX: 0.5,
       activeCampaign: null
     };
 
@@ -959,7 +959,13 @@
       const pick = sheetCampaigns[Math.floor(Math.random() * sheetCampaigns.length)];
       state.activeCampaign = pick;
 
-      // Update Card Details
+      // Update App Name
+      const appNameEl = document.getElementById('ticketAppName');
+      if (appNameEl) {
+        appNameEl.textContent = pick.appName || "VOTE & STREAM";
+      }
+
+      // Update Checklist Details
       const checklistContainer = document.getElementById('ticketChecklistContainer');
       checklistContainer.innerHTML = '';
 
@@ -1018,7 +1024,7 @@
     }, { passive: true });
 
     function spawnItem() {
-      const isWorm = Math.random() < 0.22; // 22% chance worm
+      const isWorm = Math.random() < 0.22;
       let item;
       if (isWorm) {
         item = { type: 'worm', emoji: '🐛', pts: -1, speed: 3.2 + Math.random() * 1.5 };
@@ -1034,7 +1040,6 @@
     }
 
     function updateGame(dt) {
-      // Spawn items
       lastSpawn += dt;
       if (lastSpawn > spawnInterval) {
         spawnItem();
@@ -1042,24 +1047,20 @@
         if (spawnInterval > 480) spawnInterval -= 2;
       }
 
-      // Update clouds
       clouds.forEach(c => {
         c.x += c.speed;
         if (c.x - c.r > canvas.width) c.x = -c.r * 2;
       });
 
-      // Basket position
       const basketWidth = 96;
       const basketHeight = 56;
       const basketX = state.basketX * canvas.width - (basketWidth / 2);
       const basketY = canvas.height - basketHeight - 48;
 
-      // Update items
       for (let i = items.length - 1; i >= 0; i--) {
         const item = items[i];
         item.y += item.speed * (dt / 16.6);
 
-        // Collision check
         const catchX = item.x > basketX - 10 && item.x < basketX + basketWidth + 10;
         const catchY = item.y > basketY - 15 && item.y < basketY + basketHeight - 10;
 
@@ -1084,7 +1085,6 @@
           continue;
         }
 
-        // Drop out of screen
         if (item.y > canvas.height + 40) {
           items.splice(i, 1);
         }
@@ -1094,7 +1094,6 @@
     function renderGame() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // Sky Background
       const skyGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
       skyGrad.addColorStop(0, '#C7EEFF');
       skyGrad.addColorStop(0.75, '#EBF9FF');
@@ -1102,7 +1101,6 @@
       ctx.fillStyle = skyGrad;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Clouds
       ctx.fillStyle = 'rgba(255, 255, 255, 0.75)';
       clouds.forEach(c => {
         ctx.beginPath();
@@ -1112,21 +1110,18 @@
         ctx.fill();
       });
 
-      // Ground / Lawn
       const groundH = 46;
       ctx.fillStyle = '#4ADE80';
       ctx.fillRect(0, canvas.height - groundH, canvas.width, groundH);
       ctx.fillStyle = '#22C55E';
       ctx.fillRect(0, canvas.height - groundH, canvas.width, 6);
 
-      // Flowers on ground
       ctx.font = '14px sans-serif';
       ctx.textAlign = 'center';
       for (let x = 20; x < canvas.width; x += 45) {
         ctx.fillText('🌼', x, canvas.height - 14);
       }
 
-      // Draw Items
       items.forEach(it => {
         ctx.font = `${it.size}px sans-serif`;
         ctx.textAlign = 'center';
@@ -1134,25 +1129,21 @@
         ctx.fillText(it.emoji, it.x, it.y);
       });
 
-      // Draw Basket & Member
       const basketW = 96;
       const basketH = 54;
       const bx = state.basketX * canvas.width - (basketW / 2);
       const by = canvas.height - basketH - 48;
 
-      // Member Avatar peering over basket
       ctx.font = '52px sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'bottom';
       ctx.fillText(state.selectedMember.emoji, bx + basketW / 2, by + 18);
 
-      // Woven Basket
       ctx.fillStyle = '#D97706';
       ctx.beginPath();
       ctx.roundRect(bx, by + 12, basketW, basketH, [10, 10, 24, 24]);
       ctx.fill();
 
-      // Ribbon / Plaid rim
       ctx.fillStyle = '#F472B6';
       ctx.beginPath();
       ctx.roundRect(bx - 3, by + 8, basketW + 6, 12, 6);
@@ -1195,7 +1186,6 @@
         return;
       }
 
-      // Check Proof Requirement
       const isAlreadySubmitted = checkLocalProofStatus(name) || state.hasSubmittedToday;
       const proofUrl = inputProofUrl.value.trim();
 
@@ -1206,7 +1196,6 @@
         return;
       }
 
-      // Save Proof if newly submitted
       if (proofUrl) {
         markLocalProofSubmitted(name);
         state.currentProof = proofUrl;
@@ -1222,13 +1211,11 @@
       items = [];
       spawnInterval = 900;
 
-      // Update HUD
       document.getElementById('hudMemberIcon').textContent = state.selectedMember.emoji;
       document.getElementById('hudFarmerName').textContent = state.playerName;
       updateHudValues();
       updateHeartsUI();
 
-      // UI Switch
       startModal.classList.add('hidden');
       gameOverModal.classList.add('hidden');
       shareModal.classList.add('hidden');
@@ -1244,14 +1231,11 @@
       state.isPlaying = false;
       if (animId) cancelAnimationFrame(animId);
 
-      // Save High Score
       savePlayerHighScore(state.playerName, state.score);
       const highScore = getPlayerHighScore(state.playerName);
 
-      // Send to Google Sheets
       sendGameRecordToSheet(state.score, state.maxCombo, state.selectedMember.nameEn, state.currentProof);
 
-      // Populate Game Over Modal
       document.getElementById('goMemberEmoji').textContent = state.selectedMember.emoji;
       document.getElementById('goScoreVal').textContent = state.score.toLocaleString();
       document.getElementById('goComboVal').textContent = `${state.maxCombo}x`;
@@ -1273,7 +1257,6 @@
       document.getElementById('ticketVeggieCount').textContent = `${state.veggieCount} ชิ้น`;
       document.getElementById('ticketHighScore').textContent = highScore.toLocaleString();
 
-      // Apply random app campaign from sheet
       applyRandomCampaign();
 
       gameOverModal.classList.add('hidden');
